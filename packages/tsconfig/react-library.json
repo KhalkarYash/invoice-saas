@@ -1,0 +1,13 @@
+{
+  "extends": "./base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "ESNext",
+    "target": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "@repo/events",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs --dts"
+  },
+  "devDependencies": {
+    "@repo/tsconfig": "workspace:*"
+  },
+  "dependencies": {
+    "@aws-sdk/client-eventbridge": "^3.600.0",
+    "@repo/config": "workspace:*",
+    "@repo/types": "workspace:*"
+  }
+}
