@@ -23,6 +23,8 @@ const envSchema = z.object({
   USER_SERVICE_URL: z.string().optional(),
   INVOICE_SERVICE_URL: z.string().optional(),
   PAYMENT_SERVICE_URL: z.string().optional(),
+
+  API_GATEWAY_URL: z.string().optional(),
 });
 
 const env = envSchema.parse(process.env);
@@ -50,4 +52,6 @@ export const config = {
   userServiceUrl: env.USER_SERVICE_URL ?? "",
   invoiceServiceUrl: env.INVOICE_SERVICE_URL ?? "",
   paymentServiceUrl: env.PAYMENT_SERVICE_URL ?? "",
+
+  apiGatewayUrl: env.API_GATEWAY_URL ?? "",
 };
