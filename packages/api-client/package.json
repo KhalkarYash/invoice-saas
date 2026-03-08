@@ -1,5 +1,5 @@
 {
-  "name": "@repo/logger",
+  "name": "@repo/api-client",
   "version": "1.0.0",
   "private": true,
   "main": "dist/index.js",
@@ -11,13 +11,14 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format cjs --dts"
+    "build": "tsup src/index.ts --format cjs --dts",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@repo/config": "workspace:*",
+    "@repo/types": "workspace:*"
   },
   "devDependencies": {
     "@repo/tsconfig": "workspace:*"
-  },
-  "dependencies": {
-    "@aws-sdk/client-cloudwatch-logs": "^3.1004.0",
-    "@repo/config": "workspace:*"
   }
 }
