@@ -185,6 +185,9 @@ importers:
       '@repo/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
+      '@types/node':
+        specifier: ^20
+        version: 20.19.37
 
   packages/eslint-config:
     dependencies:
