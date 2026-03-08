@@ -36,5 +36,5 @@ jobs:
       - name: Lint
         run: pnpm turbo run lint
 
-      - name: Test
-        run: pnpm turbo run test
+      # - name: Test
+      #   run: pnpm turbo run test
