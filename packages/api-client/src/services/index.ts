@@ -1,4 +1,3 @@
-export * from "./auth.service";
 export * from "./organization.service";
 export * from "./member.service";
 export * from "./client.service";

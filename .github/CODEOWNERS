@@ -1,11 +1,15 @@
 # Global owner for everything
-* @yashmaheshkhalkar
+
+- @yashmaheshkhalkar
 
 # Mobile app
-/apps/mobile/ @mobile-team
+
+/apps/mobile/ @yashmaheshkhalkar
 
 # Backend services
-/packages/service/ @backend-team
+
+/packages/service/ @yashmaheshkhalkar
 
 # Shared configs
+
 /packages/tsconfig/ @yashmaheshkhalkar

@@ -1,25 +1,34 @@
 import { httpClient } from "../http/http-client";
+import type { OrganizationMember, OrganizationId, MemberId } from "@repo/types";
 
-export const getMembers = (orgId: string) =>
-  httpClient(`/organizations/${orgId}/members`);
+type InviteMemberPayload = { email: string; roleId?: string };
 
-export const inviteMember = (orgId: string, payload: any) =>
-  httpClient(`/organizations/${orgId}/members/invite`, {
+export const getMembers = (orgId: OrganizationId) =>
+  httpClient<OrganizationMember[]>(`/organizations/${orgId}/members`);
+
+export const inviteMember = (
+  orgId: OrganizationId,
+  payload: InviteMemberPayload,
+) =>
+  httpClient<OrganizationMember>(`/organizations/${orgId}/members/invite`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
 
-export const removeMember = (orgId: string, memberId: string) =>
-  httpClient(`/organizations/${orgId}/members/${memberId}`, {
+export const removeMember = (orgId: OrganizationId, memberId: MemberId) =>
+  httpClient<void>(`/organizations/${orgId}/members/${memberId}`, {
     method: "DELETE",
   });
 
 export const updateMemberRole = (
-  orgId: string,
-  memberId: string,
+  orgId: OrganizationId,
+  memberId: MemberId,
   roleId: string,
 ) =>
-  httpClient(`/organizations/${orgId}/members/${memberId}/role`, {
-    method: "PATCH",
-    body: JSON.stringify({ roleId }),
-  });
+  httpClient<OrganizationMember>(
+    `/organizations/${orgId}/members/${memberId}/role`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ roleId }),
+    },
+  );

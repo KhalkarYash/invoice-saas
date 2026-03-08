@@ -1,29 +1,43 @@
 import { httpClient } from "../http/http-client";
+import type {
+  Invoice,
+  InvoiceId,
+  OrganizationId,
+  InvoiceCurrency,
+} from "@repo/types";
 
-export const getInvoices = (orgId: string) =>
-  httpClient("/invoices", { query: { organizationId: orgId } });
+type CreateInvoicePayload = Omit<Invoice, "id" | "createdAt" | "updatedAt">;
+type UpdateInvoicePayload = Partial<
+  Omit<Invoice, "id" | "userId" | "createdAt">
+>;
 
-export const getInvoice = (invoiceId: string) =>
-  httpClient(`/invoices/${invoiceId}`);
+export const getInvoices = (orgId: OrganizationId) =>
+  httpClient<Invoice[]>("/invoices", { query: { organizationId: orgId } });
 
-export const createInvoice = (payload: any) =>
-  httpClient("/invoices", {
+export const getInvoice = (invoiceId: InvoiceId) =>
+  httpClient<Invoice>(`/invoices/${invoiceId}`);
+
+export const createInvoice = (payload: CreateInvoicePayload) =>
+  httpClient<Invoice>("/invoices", {
     method: "POST",
     body: JSON.stringify(payload),
   });
 
-export const updateInvoice = (invoiceId: string, payload: any) =>
-  httpClient(`/invoices/${invoiceId}`, {
+export const updateInvoice = (
+  invoiceId: InvoiceId,
+  payload: UpdateInvoicePayload,
+) =>
+  httpClient<Invoice>(`/invoices/${invoiceId}`, {
     method: "PATCH",
     body: JSON.stringify(payload),
   });
 
-export const deleteInvoice = (invoiceId: string) =>
-  httpClient(`/invoices/${invoiceId}`, {
+export const deleteInvoice = (invoiceId: InvoiceId) =>
+  httpClient<void>(`/invoices/${invoiceId}`, {
     method: "DELETE",
   });
 
-export const sendInvoice = (invoiceId: string) =>
-  httpClient(`/invoices/${invoiceId}/send`, {
+export const sendInvoice = (invoiceId: InvoiceId) =>
+  httpClient<void>(`/invoices/${invoiceId}/send`, {
     method: "POST",
   });

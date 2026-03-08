@@ -1,8 +1,18 @@
 import { httpClient } from "../http/http-client";
+import type { NotificationId } from "@repo/types";
 
-export const getNotifications = () => httpClient("/notifications");
+type Notification = {
+  id: NotificationId;
+  title: string;
+  body: string;
+  read: boolean;
+  createdAt: string;
+};
 
-export const markNotificationRead = (id: string) =>
-  httpClient(`/notifications/${id}/read`, {
+export const getNotifications = () =>
+  httpClient<Notification[]>("/notifications");
+
+export const markNotificationRead = (id: NotificationId) =>
+  httpClient<void>(`/notifications/${id}/read`, {
     method: "POST",
   });
