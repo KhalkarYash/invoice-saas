@@ -1,1 +1,1 @@
-// export * from "./middlewares/auth.middleware";
+export * from "./middlewares/auth.middleware";
