@@ -1,0 +1,118 @@
+name: Deploy
+
+# Only run when PR is merged into main
+on:
+  workflow_dispatch: # optional manual trigger
+  pull_request:
+    types: [closed]
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-services:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: auth-service
+            lambda: invoiceAuthFunction
+          - service: user-service
+            lambda: invoiceUserFunction
+          - service: invoice-service
+            lambda: invoiceInvoiceFunction
+          - service: payment-service
+            lambda: invoicePaymentFunction
+          - service: notification-service
+            lambda: invoiceNotificationFunction
+
+    steps:
+      # 1. Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js and pnpm
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # 4. Build the service
+      - name: Build Service
+        run: pnpm --filter ${{ matrix.service }} build
+
+      # 5. Package the service into a zip
+      - name: Package Service
+        run: |
+          cd apps/${{ matrix.service }}
+          zip -r ../../${{ matrix.service }}.zip dist package.json
+          cd ../..
+
+      # 6. Upload zip to S3 in `services/` folder (overwrite if exists)
+      - name: Upload to S3
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          aws s3 cp ${{ matrix.service }}.zip s3://invoice-saas-s3/services/${{ matrix.service }}.zip --region $AWS_REGION
+
+      # 7. Update Lambda to use zip from S3
+      - name: Update Lambda
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ matrix.lambda }} \
+            --s3-bucket invoice-saas-s3 \
+            --s3-key services/${{ matrix.service }}.zip \
+            --region $AWS_REGION
+
+      # 8. Cleanup zip from runner
+      - name: Cleanup Zip
+        run: rm -f ${{ matrix.service }}.zip
+
+  deploy-web:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    needs: deploy-services
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Web
+        run: pnpm --filter web build
+
+      - name: Deploy Web (Vercel)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          pnpm dlx vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+          pnpm dlx vercel build --prod --token="$VERCEL_TOKEN"
+          pnpm dlx vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
