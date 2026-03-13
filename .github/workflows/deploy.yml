@@ -35,41 +35,39 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Setup Node.js and pnpm
+      # 2. Setup Node.js
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
+      # 3. Install pnpm globally
+      - name: Install pnpm
+        run: npm install -g pnpm@9
 
-      # 3. Install dependencies
+      # 4. Install dependencies
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # 4. Build the service
+      # 5. Build the service
       - name: Build Service
         run: pnpm --filter ${{ matrix.service }} build
 
-      # 5. Package the service into a zip
+      # 6. Package the service into a zip
       - name: Package Service
         run: |
           cd apps/${{ matrix.service }}
           zip -r ../../${{ matrix.service }}.zip dist package.json
           cd ../..
 
-      # 6. Upload zip to S3 in `services/` folder (overwrite if exists)
+      # 7. Upload zip to S3 in `services/` folder (overwrite if exists)
       - name: Upload to S3
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
           aws s3 cp ${{ matrix.service }}.zip s3://invoice-saas-s3/services/${{ matrix.service }}.zip --region $AWS_REGION
 
-      # 7. Update Lambda to use zip from S3
+      # 8. Update Lambda to use zip from S3
       - name: Update Lambda
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}
@@ -80,7 +78,7 @@ jobs:
             --s3-key services/${{ matrix.service }}.zip \
             --region $AWS_REGION
 
-      # 8. Cleanup zip from runner
+      # 9. Cleanup zip from runner
       - name: Cleanup Zip
         run: rm -f ${{ matrix.service }}.zip
 
@@ -95,11 +93,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
+      - name: Install pnpm
+        run: npm install -g pnpm@9
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
