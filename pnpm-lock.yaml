@@ -48,6 +48,9 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0
     devDependencies:
+      '@repo/tsconfig':
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
       '@types/cors':
         specifier: ^2.8.19
         version: 2.8.19
@@ -79,6 +82,9 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0
     devDependencies:
+      '@repo/tsconfig':
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
       '@types/cors':
         specifier: ^2.8.19
         version: 2.8.19
@@ -204,6 +210,9 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0
     devDependencies:
+      '@repo/tsconfig':
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
       '@types/cors':
         specifier: ^2.8.19
         version: 2.8.19
@@ -235,6 +244,9 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0
     devDependencies:
+      '@repo/tsconfig':
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
       '@types/cors':
         specifier: ^2.8.19
         version: 2.8.19
@@ -266,6 +278,9 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0
     devDependencies:
+      '@repo/tsconfig':
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
       '@types/cors':
         specifier: ^2.8.19
         version: 2.8.19
