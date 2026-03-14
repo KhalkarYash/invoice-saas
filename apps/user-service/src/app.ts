@@ -6,8 +6,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send("API running");
+app.get("/users", (req, res) => {
+  res.send("User API running");
 });
 
 export default app;
