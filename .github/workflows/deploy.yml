@@ -1,8 +1,8 @@
 name: Deploy
 
-# Trigger manually or on PR merge into main
+# Only run when PR is merged into main
 on:
-  workflow_dispatch:
+  workflow_dispatch: # optional manual trigger
   pull_request:
     types: [closed]
 
@@ -13,7 +13,7 @@ concurrency:
 jobs:
   deploy-services:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
 
     strategy:
       fail-fast: false
@@ -31,51 +31,53 @@ jobs:
             lambda: invoiceNotificationFunction
 
     steps:
-      # 1. Checkout code
+      # 1. Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Setup Node.js with pnpm caching
-      - name: Setup Node.js
+      # 2. Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
 
-      # 3. Setup pnpm properly
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
+      # 3. Install pnpm globally
+      - name: Install pnpm
+        run: npm install -g pnpm@9
 
       # 4. Install dependencies
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # 5. Build service + dependencies using Turborepo
-      - name: Build service and dependencies
-        run: pnpm turbo run build --filter=${{ matrix.service }}^...
+      # 5. Build all packages (ensure internal dependencies are built)
+      - name: Build Packages
+        run: pnpm turbo run build --filter=./packages/*
 
-      # 6. Package Lambda (contents of dist only)
-      - name: Package Lambda
+      # 6. Build the service
+      - name: Build Service
+        run: pnpm turbo run build --filter=${{ matrix.service }}
+
+      # 7. Package the service into a zip
+      - name: Package Service
         run: |
-          cd apps/${{ matrix.service }}/dist
-          zip -r ../../../${{ matrix.service }}.zip .
+          cd apps/${{ matrix.service }}
+          zip -r ../../${{ matrix.service }}.zip dist package.json
+          cd ../..
 
-      # 7. Configure AWS credentials
-      - name: Configure AWS credentials
+      # 8. Configure AWS credentials via OIDC (no keys needed)
+      - name: Configure AWS Credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # 8. Upload zip to S3
-      - name: Upload Lambda zip to S3
+      # 9. Upload zip to S3 (overwrite if exists)
+      - name: Upload to S3
         run: |
-          aws s3 cp ${{ matrix.service }}.zip s3://invoice-saas-s3/services/${{ matrix.service }}.zip --region ${{ secrets.AWS_REGION }}
+          aws s3 cp ${{ matrix.service }}.zip s3://invoice-saas-s3/services/${{ matrix.service }}.zip \
+            --region ${{ secrets.AWS_REGION }}
 
-      # 9. Update Lambda function
+      # 10. Update Lambda to use zip from S3
       - name: Update Lambda
         run: |
           aws lambda update-function-code \
@@ -84,29 +86,24 @@ jobs:
             --s3-key services/${{ matrix.service }}.zip \
             --region ${{ secrets.AWS_REGION }}
 
-      # 10. Cleanup local zip
-      - name: Cleanup
+      # 11. Cleanup zip from runner
+      - name: Cleanup Zip
         run: rm -f ${{ matrix.service }}.zip
 
   deploy-web:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
     needs: deploy-services
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js with pnpm caching
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
+      - name: Install pnpm
+        run: npm install -g pnpm@9
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -114,7 +111,7 @@ jobs:
       - name: Build Web
         run: pnpm --filter web build
 
-      - name: Deploy Web to Vercel
+      - name: Deploy Web (Vercel)
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
