@@ -35,33 +35,34 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Setup Node.js with pnpm cache
+      # 2. Setup Node.js with pnpm caching
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
 
+      # 3. Setup pnpm properly
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
           version: 9
 
-      # 3. Install dependencies
+      # 4. Install dependencies
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # 4. Build the service + all its dependencies (Turborepo)
+      # 5. Build service + dependencies using Turborepo
       - name: Build service and dependencies
         run: pnpm turbo run build --filter=${{ matrix.service }}^...
 
-      # 5. Package the Lambda (contents of dist only)
+      # 6. Package Lambda (contents of dist only)
       - name: Package Lambda
         run: |
           cd apps/${{ matrix.service }}/dist
           zip -r ../../../${{ matrix.service }}.zip .
 
-      # 6. Configure AWS credentials
+      # 7. Configure AWS credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -69,12 +70,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # 7. Upload zip to S3
+      # 8. Upload zip to S3
       - name: Upload Lambda zip to S3
         run: |
           aws s3 cp ${{ matrix.service }}.zip s3://invoice-saas-s3/services/${{ matrix.service }}.zip --region ${{ secrets.AWS_REGION }}
 
-      # 8. Update Lambda function to use new zip
+      # 9. Update Lambda function
       - name: Update Lambda
         run: |
           aws lambda update-function-code \
@@ -83,7 +84,7 @@ jobs:
             --s3-key services/${{ matrix.service }}.zip \
             --region ${{ secrets.AWS_REGION }}
 
-      # 9. Cleanup zip
+      # 10. Cleanup local zip
       - name: Cleanup
         run: rm -f ${{ matrix.service }}.zip
 
@@ -93,10 +94,10 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js with pnpm cache
+      - name: Setup Node.js with pnpm caching
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -113,7 +114,7 @@ jobs:
       - name: Build Web
         run: pnpm --filter web build
 
-      - name: Deploy Web (Vercel)
+      - name: Deploy Web to Vercel
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
