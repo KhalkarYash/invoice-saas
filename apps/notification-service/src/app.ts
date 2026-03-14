@@ -6,8 +6,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send("API running");
+app.get("/notifications", (req, res) => {
+  res.send("Notifications API running");
 });
 
 export default app;
