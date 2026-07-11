@@ -1,4 +1,4 @@
 dist
 .env*
-!.env*.development
+!.env*.example
 node_modules
