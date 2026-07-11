@@ -3,3 +3,4 @@ dist
 !.env*.example
 node_modules
 logs
+!/src/modules/logs
