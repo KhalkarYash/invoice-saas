@@ -9,6 +9,7 @@ const env_schema = z.object({
   API_VERSION: z.string().min(1),
   ALLOWED_ORIGIN: z.string(),
   LOG_LEVEL: z.string().optional(),
+  DATABASE_URL: z.string(),
 });
 
 const env = env_schema.parse(process.env);
@@ -19,4 +20,5 @@ export const env_config = {
   api_version: env.API_VERSION,
   allowed_origin: env.ALLOWED_ORIGIN,
   log_level: env.LOG_LEVEL,
+  database_url: env.DATABASE_URL,
 };

@@ -4,3 +4,4 @@ dist
 node_modules
 logs
 !/src/modules/logs
+/src/generated/prisma
