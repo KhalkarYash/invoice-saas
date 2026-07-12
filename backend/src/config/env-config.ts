@@ -8,6 +8,7 @@ const env_schema = z.object({
   NODE_ENV: z.enum(Object.values(NODE_ENV_CONSTANT)),
   API_VERSION: z.string().min(1),
   ALLOWED_ORIGIN: z.string(),
+  LOG_LEVEL: z.string().optional(),
 });
 
 const env = env_schema.parse(process.env);
@@ -17,4 +18,5 @@ export const env_config = {
   node_env: env.NODE_ENV,
   api_version: env.API_VERSION,
   allowed_origin: env.ALLOWED_ORIGIN,
+  log_level: env.LOG_LEVEL,
 };
