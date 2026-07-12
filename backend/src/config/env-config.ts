@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 config();
 import { z } from "zod";
-import { NODE_ENV_CONSTANT } from "../constants/constants.js";
+import { NODE_ENV_CONSTANT } from "../shared/constants/constants.js";
 
 const env_schema = z.object({
   PORT: z.coerce.number().default(3000),

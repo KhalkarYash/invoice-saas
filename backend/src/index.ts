@@ -4,7 +4,7 @@ import app from "./app.js";
 import { env_config } from "./config/env-config.js";
 import serverless from "serverless-http";
 import type { APIGatewayProxyEvent, Context } from "aws-lambda";
-import logger from "./utils/logger/logger.js";
+import logger from "./shared/logger/logger.js";
 
 const { port, node_env } = env_config;
 

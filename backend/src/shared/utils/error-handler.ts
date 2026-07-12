@@ -1,6 +1,6 @@
 import type { Response } from "express";
-import { Prisma } from "@prisma/client";
 import { log_error } from "../logger/error.logger.js";
+import { Prisma } from "../../generated/prisma/client.js";
 
 export const classify_error = (error: unknown) => {
   // Unique constraint violation
